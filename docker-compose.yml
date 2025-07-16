@@ -1,0 +1,51 @@
+version: '3.8'
+
+networks:
+  video-net:
+    driver: bridge
+
+services:
+  srs:
+    image: ossrs/srs:5
+    container_name: srs-hls
+    command: ["./objs/srs", "-c", "conf/srs.conf"]
+    ports:
+      - "1935:1935"      # RTMP for input
+      - "8080:8080"      # HTTP for HLS output
+      - "10080:10080/udp"  # SRT for analysis input
+    volumes:
+      - ./srs-hls-platform/srs/srs.conf:/usr/local/srs/conf/srs.conf
+      # Volume para compartilhar os arquivos HLS com o Nginx
+      - ./srs-hls-platform/web/html:/usr/local/srs/objs/nginx/html
+    networks:
+      - video-net
+    restart: always
+
+  video-analysis:
+    build:
+      context: ./video-analysis-pipeline
+      dockerfile: Dockerfile
+    container_name: video-analysis
+    depends_on:
+      - srs
+    command: >
+      python3 scripts/main.py 
+      --input-uri "http://srs:8080/live/livestream.m3u8" 
+      --srt-output-uri "srt://srs:10080?streamid=#!::h=live,m=publish,stream=processed"
+    networks:
+      - video-net
+    restart: always
+
+  web:
+    image: nginx:1.25
+    container_name: nginx-web
+    ports:
+      - "80:80"
+    volumes:
+      - ./srs-hls-platform/web/html:/usr/share/nginx/html
+      - ./srs-hls-platform/web/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - video-net
+    depends_on:
+      - srs
+    restart: always

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  srs-server:
+    image: ossrs/srs:5
+    container_name: srs-server
+    restart: always
+    ports:
+      - "1935:1935"      # Porta RTMP (TCP) para ingestão legada
+      - "8080:8080"      # Porta HTTP (TCP) para o console de API do SRS
+      - "10080:10080/udp" # Porta SRT (UDP) para ingestão principal
+    volumes:
+      - ./srs/srs.conf:/usr/local/srs/conf/srs.conf
+      - hls-data:/usr/local/srs/objs/nginx/html
+    command: ./objs/srs -c conf/srs.conf
+
+  web-server:
+    image: nginx:stable
+    container_name: web-server
+    restart: always
+    ports:
+      - "8081:80"        # Porta HTTP (TCP) para o player web e entrega HLS
+    volumes:
+      - ./web/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./web/html/index.html:/usr/share/nginx/html/index.html:ro
+      - hls-data:/usr/share/nginx/html/hls:ro
+    depends_on:
+      - srs-server
+
+volumes:
+  hls-data:

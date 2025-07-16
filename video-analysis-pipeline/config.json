@@ -1,0 +1,12 @@
+
+{
+    "camera_focal_length_pixels": 800.0,
+    "object_real_widths_cm": {
+        "person": 50,
+        "car": 180,
+        "bicycle": 20,
+        "motorcycle": 30,
+        "bus": 250,
+        "truck": 250
+    }
+}
