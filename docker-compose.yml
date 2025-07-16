@@ -39,8 +39,6 @@ services:
   web:
     image: nginx:1.25
     container_name: nginx-web
-    ports:
-      - "80:80"
     volumes:
       - ./srs-hls-platform/web/html:/usr/share/nginx/html
       - ./srs-hls-platform/web/nginx.conf:/etc/nginx/conf.d/default.conf
