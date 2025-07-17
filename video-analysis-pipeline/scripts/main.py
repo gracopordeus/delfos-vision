@@ -29,7 +29,18 @@ class VideoAnalysisPipeline:
         self.focal_length = self.config.get("camera_focal_length_pixels", 0.0)
         self.object_real_widths = self.config.get("object_real_widths_cm", {})
 
-        self.session = onnxruntime.InferenceSession(self.model_path)
+        # Configure ONNX Runtime session options for VPS compatibility
+        session_options = onnxruntime.SessionOptions()
+        session_options.inter_op_num_threads = 1
+        session_options.intra_op_num_threads = 1
+        session_options.execution_mode = onnxruntime.ExecutionMode.ORT_SEQUENTIAL
+        
+        # Create session with conservative settings
+        self.session = onnxruntime.InferenceSession(
+            self.model_path, 
+            sess_options=session_options,
+            providers=['CPUExecutionProvider']
+        )
         self.input_name = self.session.get_inputs()[0].name
         self.output_names = [output.name for output in self.session.get_outputs()]
 
