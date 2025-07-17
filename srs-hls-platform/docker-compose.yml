@@ -1,31 +1,43 @@
 version: '3.8'
 
+networks:
+  video-net:
+    driver: bridge
+
 services:
-  srs-server:
+  srs:
     image: ossrs/srs:5
-    container_name: srs-server
-    restart: always
+    container_name: srs-hls
+    command: ["./objs/srs", "-c", "conf/srs.conf"]
     ports:
-      - "1935:1935"      # Porta RTMP (TCP) para ingestão legada
-      - "8080:8080"      # Porta HTTP (TCP) para o console de API do SRS
-      - "10080:10080/udp" # Porta SRT (UDP) para ingestão principal
+      - "1935:1935"      # RTMP for input
+      - "8080:8080"      # HTTP API for HLS access
+      - "10080:10080/udp"  # SRT for analysis input
     volumes:
       - ./srs/srs.conf:/usr/local/srs/conf/srs.conf
+      # Volume nomeado para compartilhar os arquivos HLS com o Nginx
       - hls-data:/usr/local/srs/objs/nginx/html
-    command: ./objs/srs -c conf/srs.conf
-
-  web-server:
-    image: nginx:stable
-    container_name: web-server
+    networks:
+      - video-net
     restart: always
+
+  web:
+    image: nginx:1.25
+    container_name: nginx-web
     ports:
-      - "8081:80"        # Porta HTTP (TCP) para o player web e entrega HLS
+      - "8081:80"        # Porta HTTP para o player web e entrega HLS
     volumes:
-      - ./web/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./web/html/index.html:/usr/share/nginx/html/index.html:ro
+      # Página HTML estática
+      - ./web/html:/usr/share/nginx/html
+      # Volume compartilhado com HLS files do SRS
       - hls-data:/usr/share/nginx/html/hls:ro
+      # Configuração do nginx
+      - ./web/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - video-net
     depends_on:
-      - srs-server
+      - srs
+    restart: always
 
 volumes:
-  hls-data:
+  hls-data: 
