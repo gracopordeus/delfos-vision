@@ -30,6 +30,10 @@ services:
     command: 
       - python3
       - scripts/main.py
+      - --config-path
+      - "/app/config.json"
+      - --model-path
+      - "/app/models/mobilenet_ssd_quantized.onnx"
       - --input-uri
       - "http://srs:8080/live/livestream.m3u8"
       - --srt-output-uri
