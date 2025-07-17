@@ -41,17 +41,7 @@ services:
       - seccomp:unconfined
     cap_add:
       - SYS_NICE
-    command: 
-      - python3
-      - scripts/main.py
-      - --config-path
-      - /app/config.json
-      - --model-path
-      - /app/models/mobilenet_ssd_quantized.onnx
-      - --input-uri
-      - http://srs:8080/live/livestream.m3u8
-      - --srt-output-uri
-      - srt://srs:10080?streamid=#!::r=live/processed
+    command: python3 scripts/main.py --config-path "/app/config.json" --model-path "/app/models/mobilenet_ssd_quantized.onnx" --input-uri "http://srs:8080/live/livestream.m3u8" --srt-output-uri 'srt://srs:10080?streamid=#!::r=live/processed'
     networks:
       - video-net
     restart: always
