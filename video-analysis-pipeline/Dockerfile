@@ -27,6 +27,7 @@ RUN apt-get update && \
     libgstreamer1.0-dev \
     build-essential \
     git \
+    curl \
     && \
     rm -rf /var/lib/apt/lists/*
 
@@ -38,6 +39,18 @@ COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Create models directory and download ONNX models
+RUN mkdir -p models && \
+    echo "Downloading MobileNet-SSD ONNX models..." && \
+    curl -L -o models/mobilenet_ssd_quantized.onnx "https://github.com/onnx/models/raw/main/validated/vision/object_detection_segmentation/ssd-mobilenetv1/model/ssd_mobilenet_v1_10.onnx" && \
+    curl -L -o models/mobilenet_ssd.onnx "https://github.com/onnx/models/raw/main/validated/vision/object_detection_segmentation/ssd-mobilenetv1/model/ssd_mobilenet_v1_10.onnx" && \
+    echo "Models downloaded successfully. Checking file sizes:" && \
+    ls -lh models/ && \
+    echo "Verifying model files are not empty:" && \
+    test -s models/mobilenet_ssd_quantized.onnx && \
+    test -s models/mobilenet_ssd.onnx && \
+    echo "✅ All models downloaded and verified successfully!"
 
 # Copy the rest of the application code
 COPY . .
