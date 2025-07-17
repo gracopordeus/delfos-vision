@@ -27,6 +27,19 @@ services:
     container_name: video-analysis
     depends_on:
       - srs
+    environment:
+      # Disable NUMA memory policy optimizations to avoid set_mempolicy errors in VPS
+      - OMP_NUM_THREADS=1
+      - MKL_NUM_THREADS=1
+      - OPENBLAS_NUM_THREADS=1
+      - NUMBA_NUM_THREADS=1
+      - OMP_PROC_BIND=false
+      - KMP_AFFINITY=disabled
+    # Additional security options for VPS if environment variables don't work
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_NICE
     command: 
       - python3
       - scripts/main.py
