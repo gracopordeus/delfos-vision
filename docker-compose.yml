@@ -29,9 +29,9 @@ services:
     depends_on:
       - srs
     command: >
-      python3 scripts/main.py 
-      --input-uri "http://srs:8080/live/livestream.m3u8" 
-      --srt-output-uri "srt://srs:10080?streamid=#!::h=live,m=publish,stream=processed"
+      python3 scripts/main.py \
+      --input-uri "http://srs:8080/live/livestream.m3u8" \
+      --srt-output-uri "srt://srs:10080?streamid=#!::r=live/processed"
     networks:
       - video-net
     restart: always
