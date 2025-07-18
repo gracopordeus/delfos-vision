@@ -2,32 +2,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Análise de Vídeo</title>
+    <title>Dashboard de Análise de Vídeo - Multi-Stream</title>
     <style>
-        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 24px; }
-        h1 { text-align: center; color: #ffffff; font-weight: 600; margin-bottom: 24px; }
-        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; }
-        .video-card { background-color: #1e1e1e; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); overflow: hidden; width: 100%; max-width: 640px; }
-        .video-card h2 { background-color: #2a2a2a; margin: 0; padding: 12px 16px; font-size: 1.1em; font-weight: 500; }
-        video { width: 100%; display: block; background-color: #000; }
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; 
+            background-color: #121212; 
+            color: #e0e0e0; 
+            margin: 0; 
+            padding: 24px; 
+        }
+        
+        h1 { 
+            text-align: center; 
+            color: #ffffff; 
+            font-weight: 600; 
+            margin-bottom: 8px; 
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #b0b0b0;
+            font-size: 0.9em;
+            margin-bottom: 32px;
+        }
+        
+        .container { 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .video-card { 
+            background-color: #1e1e1e; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4); 
+            overflow: hidden; 
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        }
+        
+        .video-card h2 { 
+            background: linear-gradient(135deg, #2a2a2a, #363636);
+            margin: 0; 
+            padding: 16px 20px; 
+            font-size: 1.1em; 
+            font-weight: 500;
+            border-bottom: 2px solid #404040;
+        }
+        
+        .yolo-header {
+            background: linear-gradient(135deg, #1a472a, #2d5a3d);
+            border-bottom: 2px solid #4caf50;
+        }
+        
+        .bev-header {
+            background: linear-gradient(135deg, #1a237e, #303f9f);
+            border-bottom: 2px solid #3f51b5;
+        }
+        
+        .original-header {
+            background: linear-gradient(135deg, #4a4a4a, #5a5a5a);
+            border-bottom: 2px solid #777;
+        }
+        
+        video { 
+            width: 100%; 
+            display: block; 
+            background-color: #000; 
+            aspect-ratio: 16/9;
+        }
+        
+        .stream-info {
+            padding: 12px 20px;
+            background-color: #2a2a2a;
+            font-size: 0.85em;
+            color: #b0b0b0;
+            border-top: 1px solid #404040;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #ff4444;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.connected {
+            background-color: #4caf50;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #888;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
-    <h1>Dashboard de Análise de Vídeo</h1>
+    <h1>🚀 Dashboard de Análise de Vídeo Multi-Stream</h1>
+    <div class="subtitle">
+        Sistema integrado YOLO + Pseudo-LiDAR • Servidor: 195.200.0.55 • Tempo real
+    </div>
+    
     <div class="container">
         <div class="video-card">
-            <h2>Vídeo Original</h2>
+            <h2 class="original-header">📹 Vídeo Original</h2>
             <video id="original-video" controls autoplay muted></video>
+            <div class="stream-info">
+                <span class="status-indicator" id="original-status"></span>
+                <strong>Stream:</strong> /live/livestream<br>
+                <strong>Fonte:</strong> Entrada principal do sistema
+            </div>
         </div>
+        
         <div class="video-card">
-            <h2>Vídeo Processado (com Análise)</h2>
+            <h2 class="yolo-header">🎯 YOLO - Detecções 2D</h2>
             <video id="processed-video" controls autoplay muted></video>
+            <div class="stream-info">
+                <span class="status-indicator" id="yolo-status"></span>
+                <strong>Stream:</strong> /live/processed<br>
+                <strong>Modelo:</strong> YOLOv8 • <strong>Performance:</strong> 25+ FPS
+            </div>
         </div>
+        
+        <div class="video-card">
+            <h2 class="bev-header">🗺️ Pseudo-LiDAR BEV</h2>
+            <video id="bev-video" controls autoplay muted></video>
+            <div class="stream-info">
+                <span class="status-indicator" id="bev-status"></span>
+                <strong>Stream:</strong> /live/bev_processed<br>
+                <strong>Modelo:</strong> DPT/MiDaS • <strong>Saída:</strong> Vista 3D Bird's Eye View
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p><strong>🔄 Como funciona:</strong></p>
+        <p>• <strong>Original:</strong> Stream de entrada bruto</p>
+        <p>• <strong>YOLO:</strong> Detecções 2D rápidas com bounding boxes</p>
+        <p>• <strong>Pseudo-LiDAR:</strong> Mapeamento 3D com vista superior (Original | Profundidade | BEV)</p>
+        <p>💡 Todos os pipelines processam o mesmo stream de entrada simultaneamente</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        function setupHlsPlayer(videoId, streamName) {
+        function updateStatusIndicator(statusId, connected) {
+            const indicator = document.getElementById(statusId);
+            if (indicator) {
+                indicator.classList.toggle('connected', connected);
+            }
+        }
+
+        function setupHlsPlayer(videoId, streamName, statusId) {
             const video = document.getElementById(videoId);
             const videoSrc = `/hls/${streamName}.m3u8`;
 
@@ -36,25 +191,53 @@
                     // Configurações para baixa latência
                     lowLatencyMode: true,
                     backBufferLength: 90,
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 60,
                 });
+                
                 hls.loadSource(videoSrc);
                 hls.attachMedia(video);
+                
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    video.play().catch(error => console.error(`Autoplay falhou para ${videoId}:`, error));
+                    console.log(`✅ Stream ${streamName} conectado`);
+                    updateStatusIndicator(statusId, true);
+                    video.play().catch(error => {
+                        console.error(`Autoplay falhou para ${videoId}:`, error);
+                    });
                 });
+                
                 hls.on(Hls.Events.ERROR, (event, data) => {
+                    console.error(`Erro no stream ${streamName}:`, data);
+                    updateStatusIndicator(statusId, false);
+                    
                     if (data.fatal) {
                         console.error(`Erro fatal no HLS.js para ${videoId}:`, data);
                         // Tenta se recuperar de erros de rede
                         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                            hls.startLoad();
+                            setTimeout(() => {
+                                console.log(`Tentando reconectar ${streamName}...`);
+                                hls.startLoad();
+                            }, 5000);
                         }
                     }
                 });
+                
+                // Monitorar conexão
+                hls.on(Hls.Events.FRAG_LOADED, () => {
+                    updateStatusIndicator(statusId, true);
+                });
+                
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Suporte nativo para Safari
                 video.src = videoSrc;
                 video.addEventListener('loadedmetadata', () => {
-                    video.play().catch(error => console.error(`Autoplay nativo falhou para ${videoId}:`, error));
+                    updateStatusIndicator(statusId, true);
+                    video.play().catch(error => {
+                        console.error(`Autoplay nativo falhou para ${videoId}:`, error);
+                    });
+                });
+                video.addEventListener('error', () => {
+                    updateStatusIndicator(statusId, false);
                 });
             } else {
                 alert("Seu navegador não suporta HLS.");
@@ -62,11 +245,25 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            setupHlsPlayer('original-video', 'live/livestream');
-            // Adiciona um pequeno atraso para o stream processado para dar tempo de iniciar
+            console.log('🚀 Iniciando dashboard multi-stream...');
+            
+            // Configurar stream original (imediato)
+            setupHlsPlayer('original-video', 'live/livestream', 'original-status');
+            
+            // Configurar stream YOLO (pequeno atraso)
             setTimeout(() => {
-                setupHlsPlayer('processed-video', 'live/processed');
-            }, 5000); // 5 segundos de atraso
+                setupHlsPlayer('processed-video', 'live/processed', 'yolo-status');
+            }, 3000); // 3 segundos
+            
+            // Configurar stream Pseudo-LiDAR BEV (maior atraso para dar tempo de iniciar)
+            setTimeout(() => {
+                setupHlsPlayer('bev-video', 'live/bev_processed', 'bev-status');
+            }, 6000); // 6 segundos
+            
+            console.log('📺 Players configurados:');
+            console.log('   📹 Original: /live/livestream');
+            console.log('   🎯 YOLO: /live/processed'); 
+            console.log('   🗺️ BEV: /live/bev_processed');
         });
     </script>
 </body>
